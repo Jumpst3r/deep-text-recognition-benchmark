@@ -1,0 +1,93 @@
+{
+	"general": {
+		"name": "wordimage2text",
+		"description": "Word images to text",
+		"developer": "Nicolas Dutly",
+		"affiliation": "University Of Fribourg",
+		"email": "ndutly@student.ethz.ch",
+		"author": "Nicolas Dutly",
+		"DOI": "",
+		"type": "ocr",
+		"license": "MIT",
+		"ownsCopyright": "0"
+	},"input": [
+		{
+			"file": {
+				"name": "visual",
+				"description": "Input image file Image File",
+				"options": {
+					"required": true,
+					"mimeTypes": {
+						"allowed": [
+							"image/jpeg",
+							"image/png",
+							"image/tiff"
+						],
+						"default": "image/jpeg"
+					}
+				}
+			}
+		},
+		{
+			"file": {
+				"name": "resbb",
+				"description": "Word level bounding boxes (csv)",
+				"options": {
+					"required": true,
+					"mimeTypes": {
+						"allowed": [
+							"text/csv"
+						],
+						"default": "text/csv"
+					}
+				}
+			}
+		},
+		{
+			"outputFolder": {}
+		}
+	],
+	"output": [
+		{
+			"file": {
+				"name": "Extracted_text_loc",
+				"type": "text/csv",
+				"description": "Bounding boxes coordinates and extracted text",
+				"options": {
+					"filename":"result.csv",
+					"mimeTypes": {
+						"allowed": [
+							"text/csv"
+						],
+						"default": "text/csv"
+					},
+					"visualization": false
+				}
+			}
+		},
+		{
+			"file": {
+				"name": "per_word_visual",
+				"type": "appication/zip",
+				"description": "Individual images and corresponding csv",
+				"options": {
+					"filename":"per_word_visual.zip",
+					"mimeTypes": {
+						"allowed": [
+							"application/zip"
+						],
+						"default": "application/zip"
+					},
+					"visualization": false
+				}
+			}
+		}
+	],
+	"method": {
+		"imageType": "docker",
+		"imageName": "jumpst3r/wordimage2text",
+		"testData": "https://www.dropbox.com/s/njpn3ybl5nsbape/input.zip?dl=1",
+		"executableType": "bash",
+		"executable_path": "/input/script.sh"
+	}
+}

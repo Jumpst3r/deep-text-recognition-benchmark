@@ -9,10 +9,16 @@ import torch.nn.functional as F
 from utils import CTCLabelConverter, AttnLabelConverter
 from dataset import RawDataset, AlignCollate
 from model import Model
+from parser import parse_csv
+import shutil, os
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def demo(opt):
+    inputimage = opt.input_image
+    boxesscv = opt.boxescsv
+    bboxes = parse_csv(inputimage, boxesscv)
     """ model configuration """
     if 'CTC' in opt.Prediction:
         converter = CTCLabelConverter(opt.character)
@@ -68,16 +74,11 @@ def demo(opt):
                 preds_str = converter.decode(preds_index, length_for_pred)
 
 
-            log = open(f'./log_demo_result.txt', 'a')
-            dashed_line = '-' * 80
-            head = f'{"image_path":25s}\t{"predicted_labels":25s}\tconfidence score'
-            
-            print(f'{dashed_line}\n{head}\n{dashed_line}')
-            log.write(f'{dashed_line}\n{head}\n{dashed_line}\n')
-
+            log = open(f'{opt.output_folder}result.csv', 'w')
+       
             preds_prob = F.softmax(preds, dim=2)
             preds_max_prob, _ = preds_prob.max(dim=2)
-            for img_name, pred, pred_max_prob in zip(image_path_list, preds_str, preds_max_prob):
+            for img_index, (pred, pred_max_prob) in enumerate(zip(preds_str, preds_max_prob)):
                 if 'Attn' in opt.Prediction:
                     pred_EOS = pred.find('[s]')
                     pred = pred[:pred_EOS]  # prune after "end of sentence" token ([s])
@@ -85,15 +86,22 @@ def demo(opt):
 
                 # calculate confidence score (= multiply of pred_max_prob)
                 confidence_score = pred_max_prob.cumprod(dim=0)[-1]
-
-                print(f'{img_name:25s}\t{pred:25s}\t{confidence_score:0.4f}')
-                log.write(f'{img_name:25s}\t{pred:25s}\t{confidence_score:0.4f}\n')
+                for pts in bboxes[img_index]:
+                    x,y = pts
+                    log.write(f'{x},{y},')
+                log.write(f'{pred}\n')
 
             log.close()
+            # copy log to local output folder
+            os.system(f'cp {opt.output_folder}result.csv /input/output')
+            shutil.make_archive('per_word_visual', 'zip', '/input/output')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--image_folder', required=True, help='path to image_folder which contains text images')
+    parser.add_argument('--image_folder', required=False, default="/input/output/", help='path to image_folder which contains text images')
+    parser.add_argument('--input_image', required=True, help='path to input_image')
+    parser.add_argument('--boxescsv', required=True, help='path to bounding boxes csv')
+    parser.add_argument('--output_folder', required=True, help='path to output folder')
     parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
     parser.add_argument('--batch_size', type=int, default=192, help='input batch size')
     parser.add_argument('--saved_model', required=True, help="path to saved_model to evaluation")
