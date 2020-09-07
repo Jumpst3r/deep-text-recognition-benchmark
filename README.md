@@ -8,7 +8,7 @@ Given images of words, recognize the words and output the corresponding text.
 
 To use the docker image, first pull the image using
 
-`docker pull jumpst3r/wordimage2text
+`docker pull jumpst3r/wordimage2text`
 
 And then execute 
 ```
