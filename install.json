@@ -1,7 +1,7 @@
 {
 	"general": {
 		"name": "wordimage2text",
-		"description": "Word images to text",
+		"description": "Given an image of a document and a csv file containing word-level bounding boxes (closed polygone coordinates: x1,y1,x2,y2..) perform word level OCR and output a csv file containing (x1,x2,y1,y2,detected_text) as well as a zip file containing the cropped words and the same csv",
 		"developer": "Nicolas Dutly",
 		"affiliation": "University Of Fribourg",
 		"email": "ndutly@student.ethz.ch",
